@@ -13,3 +13,16 @@ Sources consulted:
 The Google Custom Search reference documents `searchInformation.totalResults` and `formattedTotalResults`, but those fields belong to Google Custom Search JSON API and were not present in the live Serper.dev response observed for this project. Organic result length must not be used as a substitute.
 
 Direct Google verification: opening the exact Google USA allintitle URL in the browser reached a Google CAPTCHA page. The page exposed the query and organic listings but not the Tools → About summary. A server-side curl request also timed out. This confirms the exact About-results workflow requires a browser/session or a SERP provider that returns total-results metadata; it cannot be reliably implemented with the current normal Serper JSON response alone.
+
+## Scrapingdog exact-count verification
+
+Official documentation: https://www.scrapingdog.com/documentation/google-search-api/
+
+The official Scrapingdog Google Search API documentation states that `advance_search=true` returns advanced Google SERP features and shows a `search_information.total_results` field. Standard requests cost 5 credits; advanced requests cost 10 credits.
+
+Real live probe with the secured Scrapingdog key and Google USA parameters (`country=us`, `language=en`, `advance_search=true`) returned:
+
+- Unquoted query `allintitle:What can give a false-positive on a PET scan?`: `total_results: 6850`.
+- Quoted query `allintitle:"What can give a false-positive on a PET scan?"`: `time_taken: 0.38`, `total_results: 339`, `query_displayed: allintitle:\"What can give a false-positive on a PET scan?\"`.
+
+The quoted result closely matches the user’s screenshot (`About 337 results (0.38s)`), with a small live-result variance of two results. The exact count source is `search_information.total_results`, not organic-result length. The implementation should use Scrapingdog advanced search for exact allintitle counts, preserve the user’s phrase as a quoted query for multi-word keywords, and leave Serper.dev separate.

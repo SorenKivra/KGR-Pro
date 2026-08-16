@@ -20,8 +20,10 @@ export const appRouter = router({
   }),
   kgr: router({
     configuration: protectedProcedure.query(() => ({
-      configured: Boolean(process.env.SERPER_API_KEY),
-      provider: "Serper.dev",
+      configured: Boolean(process.env.SCRAPINGDOG_API_KEY),
+      exactCountProvider: "Scrapingdog",
+      serperConfigured: Boolean(process.env.SERPER_API_KEY),
+      scrapingdogConfigured: Boolean(process.env.SCRAPINGDOG_API_KEY),
       region: "United States",
       engine: "Google",
     })),
@@ -33,9 +35,9 @@ export const appRouter = router({
         }),
       )
       .mutation(async ({ input }) => {
-        const apiKey = process.env.SERPER_API_KEY;
+        const apiKey = process.env.SCRAPINGDOG_API_KEY;
         if (!apiKey) {
-          throw new Error("Serper.dev is not configured. Add SERPER_API_KEY in project settings.");
+          throw new Error("Scrapingdog is not configured. Add SCRAPINGDOG_API_KEY in project settings.");
         }
         return analyzeKeyword({ ...input, apiKey });
       }),

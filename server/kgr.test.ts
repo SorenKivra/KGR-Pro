@@ -14,8 +14,8 @@ describe("KGR calculation", () => {
   });
 
   it("reads numeric, formatted, and visible About-result payloads without inventing values", () => {
-    expect(readTotalResults({ searchInformation: { totalResults: 934 } })).toBe(934);
-    expect(readTotalResults({ searchInformation: { totalResults: "1,004" } })).toBe(1004);
+    expect(readTotalResults({ search_information: { total_results: 934 } })).toBe(934);
+    expect(readTotalResults({ search_information: { total_results: "1,004" } })).toBe(1004);
     expect(readTotalResults({ text: "About 337 results (0.38s)" })).toBe(337);
     expect(parseAboutResults("About 337 results (0.38s)")).toBe(337);
     expect(calculateKgr(readTotalResults({ text: "About 337 results (0.38s)" })!, 1000)).toBe(0.337);
@@ -23,6 +23,7 @@ describe("KGR calculation", () => {
   });
 
   it("quotes multi-word phrases exactly for Google allintitle searches", () => {
-    expect(formatAllintitleQuery("What can give a false-positive on a PET scan?")).toBe("allintitle:What can give a false-positive on a PET scan?");
+    expect(formatAllintitleQuery("What can give a false-positive on a PET scan?")).toBe('allintitle:"What can give a false-positive on a PET scan?"');
+    expect(formatAllintitleQuery("What can give a false-positive on a PET scan?", false)).toBe("allintitle:What can give a false-positive on a PET scan?");
   });
 });

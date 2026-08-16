@@ -11,3 +11,7 @@ Live provider verification: a real POST to Serper.dev for `allintitle:best ename
 Hardened desktop verification: Research Lab and API Settings still render cleanly at 1280×720 after the unavailable-count changes. The result panel now explains that exact counts are only shown when Serper returns an explicit total-result field, avoiding organic-list estimates.
 
 Hardened mobile verification at 390×844: headline, connection status, stacked metrics, intake entry point, settings card, and key-protection panel remain readable and within the viewport. No clipping or layout error was observed.
+
+## Scrapingdog provider pass
+
+The desktop Research Lab and API Settings views show Scrapingdog as the connected exact-count provider, Google USA as the target, `Advanced · total_results` as the search mode, and Serper.dev as a separate diagnostic key. The mobile Research Lab and Settings views remain readable and usable; provider labels wrap without obscuring the connection state. Full tests, the live Scrapingdog screenshot-phrase test, type-check, and production build passed on this pass.

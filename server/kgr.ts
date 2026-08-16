@@ -12,14 +12,19 @@ export type KgrResult = {
   status: "exact" | "unavailable";
   reason?: string;
   queriedAt: number;
-  source: "Google USA via Serper.dev";
+  source: "Google USA via Scrapingdog";
 };
 
-type SerperSearchResponse = {
-  searchInformation?: {
-    totalResults?: number | string;
-    formattedTotalResults?: string;
-  };
+type SearchInformation = {
+  total_results?: number | string;
+  formattedTotalResults?: string;
+  query_displayed?: string;
+  time_taken?: number;
+};
+
+type SearchResponse = {
+  search_information?: SearchInformation;
+  searchInformation?: SearchInformation;
   resultStats?: string;
   text?: string;
   markdown?: string;
@@ -27,12 +32,12 @@ type SerperSearchResponse = {
   message?: string;
 };
 
+const SCRAPINGDOG_ENDPOINT = "https://api.scrapingdog.com/google/";
 const SERPER_ENDPOINT = "https://google.serper.dev/search";
-const SERPER_SCRAPE_ENDPOINT = "https://scrape.serper.dev";
 
-export function formatAllintitleQuery(keyword: string) {
-  const phrase = keyword.trim().replace(/\\/g, "\\\\").replace(/\"/g, '\\\"');
-  return `allintitle:${phrase}`;
+export function formatAllintitleQuery(keyword: string, quotePhrase = true) {
+  const phrase = keyword.trim().replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  return quotePhrase ? `allintitle:"${phrase}"` : `allintitle:${phrase}`;
 }
 
 export function parseAboutResults(value: unknown): number | null {
@@ -50,121 +55,65 @@ export function getKgrTier(kgr: number): KgrTier {
 }
 
 export function calculateKgr(allintitleCount: number, monthlySearchVolume: number) {
-  if (!Number.isFinite(allintitleCount) || allintitleCount < 0) {
-    throw new Error("Allintitle count must be a non-negative number.");
-  }
-  if (!Number.isFinite(monthlySearchVolume) || monthlySearchVolume <= 0) {
-    throw new Error("Monthly search volume must be greater than zero.");
-  }
+  if (!Number.isFinite(allintitleCount) || allintitleCount < 0) throw new Error("Allintitle count must be a non-negative number.");
+  if (!Number.isFinite(monthlySearchVolume) || monthlySearchVolume <= 0) throw new Error("Monthly search volume must be greater than zero.");
   return allintitleCount / monthlySearchVolume;
 }
 
-export function readTotalResults(payload: SerperSearchResponse): number | null {
-  const rawValue = payload.searchInformation?.totalResults;
+export function readTotalResults(payload: SearchResponse): number | null {
+  const information = payload.search_information ?? payload.searchInformation;
+  const rawValue = information?.total_results;
   if (typeof rawValue === "number" && Number.isFinite(rawValue) && rawValue >= 0) return rawValue;
   if (typeof rawValue === "string") {
     const normalized = rawValue.replace(/[^0-9]/g, "");
     const parsed = Number.parseInt(normalized, 10);
     if (Number.isSafeInteger(parsed) && parsed >= 0) return parsed;
   }
-  return [payload.searchInformation?.formattedTotalResults, payload.resultStats, payload.text, payload.markdown, payload.html]
+  return [information?.formattedTotalResults, payload.resultStats, payload.text, payload.markdown, payload.html]
     .map(parseAboutResults).find((value): value is number => value !== null) ?? null;
 }
 
-async function scrapeGoogleAboutResults(keyword: string, apiKey: string): Promise<number | null> {
-  const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(formatAllintitleQuery(keyword))}&gl=us&hl=en`;
-  try {
-    const response = await fetch(SERPER_SCRAPE_ENDPOINT, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "X-API-KEY": apiKey },
-      body: JSON.stringify({ url: googleUrl }),
-    });
-    if (!response.ok) return null;
-    const payload = (await response.json().catch(() => ({}))) as SerperSearchResponse;
-    return readTotalResults(payload);
-  } catch {
-    return null;
+export async function fetchScrapingdogUsaAllintitle(keyword: string, apiKey: string) {
+  const url = new URL(SCRAPINGDOG_ENDPOINT);
+  url.searchParams.set("api_key", apiKey);
+  url.searchParams.set("query", formatAllintitleQuery(keyword));
+  url.searchParams.set("country", "us");
+  url.searchParams.set("language", "en");
+  url.searchParams.set("results", "10");
+  url.searchParams.set("advance_search", "true");
+
+  const response = await fetch(url, { signal: AbortSignal.timeout(20_000) });
+  const payload = (await response.json().catch(() => ({}))) as SearchResponse;
+  if (!response.ok) {
+    const providerMessage = payload.message ? ` ${payload.message}` : "";
+    throw new TRPCError({ code: response.status === 429 ? "TOO_MANY_REQUESTS" : "BAD_GATEWAY", message: `Scrapingdog request failed (${response.status}).${providerMessage}` });
   }
+  return readTotalResults(payload);
+}
+
+/** Preserved as a separate Serper-only path for diagnostics and future provider selection. */
+export async function fetchSerperUsaSearch(keyword: string, apiKey: string) {
+  const response = await fetch(SERPER_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-API-KEY": apiKey },
+    body: JSON.stringify({ q: formatAllintitleQuery(keyword), gl: "us", hl: "en", autocorrect: false, num: 1 }),
+    signal: AbortSignal.timeout(18_000),
+  });
+  const payload = (await response.json().catch(() => ({}))) as SearchResponse;
+  if (!response.ok) throw new TRPCError({ code: response.status === 429 ? "TOO_MANY_REQUESTS" : "BAD_GATEWAY", message: `Serper.dev request failed (${response.status}).` });
+  return payload;
 }
 
 export async function fetchGoogleUsaAllintitle(keyword: string, apiKey: string) {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 18_000);
-
-  try {
-    const response = await fetch(SERPER_ENDPOINT, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "X-API-KEY": apiKey,
-      },
-      body: JSON.stringify({
-        q: formatAllintitleQuery(keyword),
-        gl: "us",
-        hl: "en",
-        autocorrect: false,
-        num: 1,
-      }),
-      signal: controller.signal,
-    });
-
-    const payload = (await response.json().catch(() => ({}))) as SerperSearchResponse;
-
-    if (!response.ok) {
-      const providerMessage = payload.message ? ` ${payload.message}` : "";
-      throw new TRPCError({
-        code: response.status === 429 ? "TOO_MANY_REQUESTS" : "BAD_GATEWAY",
-        message: `Serper.dev request failed (${response.status}).${providerMessage}`,
-      });
-    }
-
-    const exactCount = readTotalResults(payload);
-    return exactCount ?? await scrapeGoogleAboutResults(keyword, apiKey);
-  } catch (error) {
-    if (error instanceof TRPCError) throw error;
-    if (error instanceof Error && error.name === "AbortError") {
-      throw new TRPCError({ code: "TIMEOUT", message: "The Serper.dev request timed out. Please retry this keyword." });
-    }
-    throw new TRPCError({
-      code: "BAD_GATEWAY",
-      message: error instanceof Error ? error.message : "Unable to reach Serper.dev.",
-    });
-  } finally {
-    clearTimeout(timeout);
-  }
+  return fetchScrapingdogUsaAllintitle(keyword, apiKey);
 }
 
-export async function analyzeKeyword(input: {
-  keyword: string;
-  monthlySearchVolume: number;
-  apiKey: string;
-}): Promise<KgrResult> {
+export async function analyzeKeyword(input: { keyword: string; monthlySearchVolume: number; apiKey: string }): Promise<KgrResult> {
   const keyword = input.keyword.trim();
-  const allintitleCount = await fetchGoogleUsaAllintitle(keyword, input.apiKey);
+  const allintitleCount = await fetchScrapingdogUsaAllintitle(keyword, input.apiKey);
   if (allintitleCount === null) {
-    return {
-      keyword,
-      allintitleCount: null,
-      monthlySearchVolume: input.monthlySearchVolume,
-      kgr: null,
-      tier: "unavailable",
-      status: "unavailable",
-      reason: "Serper.dev returned SERP listings but no exact total-result field for this query.",
-      queriedAt: Date.now(),
-      source: "Google USA via Serper.dev",
-    };
+    return { keyword, allintitleCount: null, monthlySearchVolume: input.monthlySearchVolume, kgr: null, tier: "unavailable", status: "unavailable", reason: "Scrapingdog returned SERP data without an exact Google total-results field.", queriedAt: Date.now(), source: "Google USA via Scrapingdog" };
   }
-
   const kgr = calculateKgr(allintitleCount, input.monthlySearchVolume);
-
-  return {
-    keyword,
-    allintitleCount,
-    monthlySearchVolume: input.monthlySearchVolume,
-    kgr,
-    tier: getKgrTier(kgr),
-    status: "exact",
-    queriedAt: Date.now(),
-    source: "Google USA via Serper.dev",
-  };
+  return { keyword, allintitleCount, monthlySearchVolume: input.monthlySearchVolume, kgr, tier: getKgrTier(kgr), status: "exact", queriedAt: Date.now(), source: "Google USA via Scrapingdog" };
 }
