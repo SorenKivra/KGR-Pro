@@ -6,6 +6,17 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 
+export const kgrBatchInput = z.object({
+  visitorId: z.string().trim().min(16).max(64),
+  queryMode: z.enum(["quoted", "unquoted"]).default("unquoted"),
+  exactProvider: z.enum(["scrapingdog", "scrapingbee"]).default("scrapingdog"),
+  fallbackProvider: z.enum(["scrapingdog", "scrapingbee"]).optional(),
+  serperApiKey: z.string().max(300).optional(),
+  scrapingdogApiKey: z.string().max(300).optional(),
+  scrapingbeeApiKey: z.string().max(300).optional(),
+  keywords: z.array(z.object({ keyword: z.string().trim().min(1).max(240), monthlySearchVolume: z.number().int().positive().max(100_000_000) })).min(1).max(10000),
+});
+
 export const appRouter = router({
     // if you need to use socket.io, read and register route in server/_core/index.ts, all api should start with '/api/' so that the gateway can route correctly
   system: systemRouter,
@@ -48,16 +59,7 @@ export const appRouter = router({
         return analyzeKeyword(input);
       }),
     analyzeBatch: publicProcedure
-      .input(z.object({
-        visitorId: z.string().trim().min(16).max(64),
-        queryMode: z.enum(["quoted", "unquoted"]).default("unquoted"),
-        exactProvider: z.enum(["scrapingdog", "scrapingbee"]).default("scrapingdog"),
-        fallbackProvider: z.enum(["scrapingdog", "scrapingbee"]).optional(),
-        serperApiKey: z.string().max(300).optional(),
-        scrapingdogApiKey: z.string().max(300).optional(),
-        scrapingbeeApiKey: z.string().max(300).optional(),
-        keywords: z.array(z.object({ keyword: z.string().trim().min(1).max(240), monthlySearchVolume: z.number().int().positive().max(100_000_000) })).min(1).max(10000),
-      }))
+      .input(kgrBatchInput)
       .mutation(async ({ input }) => {
         const hasExactKey = input.exactProvider === "scrapingbee" ? (input.scrapingbeeApiKey || process.env.SCRAPINGBEE_API_KEY) : (input.scrapingdogApiKey || process.env.SCRAPINGDOG_API_KEY);
         if (!hasExactKey) throw new Error(`${input.exactProvider === "scrapingbee" ? "ScrapingBee" : "Scrapingdog"} is not configured. Add its key in API settings.`);

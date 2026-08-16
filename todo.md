@@ -112,3 +112,6 @@ All code, automated tests, direct live-provider verification, type-check, produc
 - [x] Add streamed per-keyword progress reporting within an active provider request; current implementation reports progress between sequential 1,000-keyword submissions, while provider-internal streaming remains outside the synchronous provider API contract.
 - [x] Render fetched history result rows in a visible browsable detail table before loading or copying them.
 - [x] Record the final checkpoint version in this checklist after saving it: `74c342ac`.
+
+- [x] Remove the minimum batch-size requirement so any positive keyword count can be analyzed, while retaining the safe maximum and large-batch chunking.
+- [x] Update dashboard copy and regression coverage for flexible batch sizes, then verify and checkpoint the change.
