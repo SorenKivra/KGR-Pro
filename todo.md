@@ -71,3 +71,9 @@ All code, automated tests, direct live-provider verification, type-check, produc
 - [x] Route exact allintitle count retrieval through Scrapingdog and preserve Serper.dev as a separate provider.
 - [x] Update tests, settings copy, KGR results, and exports to identify Scrapingdog as the exact-count source.
 - [x] Run the complete test, type-check, production build, and responsive UI verification, then save a checkpoint.
+
+- [ ] Remove Manus authentication gate from the public KGR dashboard.
+- [ ] Convert only the KGR configuration and analysis procedures to public access while retaining server-side provider secrets.
+- [ ] Add public-flow tests and visible credit-usage warning copy.
+- [ ] Verify public dashboard access, live analysis controls, tests, type-check, build, and responsive layout.
+- [ ] Save a new public-access checkpoint for review.
