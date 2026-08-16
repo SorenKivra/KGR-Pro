@@ -26,3 +26,9 @@ Real live probe with the secured Scrapingdog key and Google USA parameters (`cou
 - Quoted query `allintitle:"What can give a false-positive on a PET scan?"`: `time_taken: 0.38`, `total_results: 339`, `query_displayed: allintitle:\"What can give a false-positive on a PET scan?\"`.
 
 The quoted result closely matches the user’s screenshot (`About 337 results (0.38s)`), with a small live-result variance of two results. The exact count source is `search_information.total_results`, not organic-result length. The implementation should use Scrapingdog advanced search for exact allintitle counts, preserve the user’s phrase as a quoted query for multi-word keywords, and leave Serper.dev separate.
+
+## ScrapingBee provider research
+
+Official documentation: https://www.scrapingbee.com/documentation/google-api/ and https://www.scrapingbee.com/features/google/
+
+ScrapingBee’s Google endpoint is `https://app.scrapingbee.com/api/v1/google` and accepts `search`, `country_code` (default `us`), `search_type`, and an `Authorization: Bearer <API_KEY>` header. The structured response includes `meta_data.number_of_results`, `meta_data.number_of_organic_results`, and the Google result URL. The documentation example confirms that `number_of_results` is the provider total-results metadata needed for KGR when returned for an allintitle query. ScrapingBee advertises 1,000 free API credits with no credit card required on its Google API page.

@@ -1,56 +1,36 @@
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { trpc } from "@/lib/trpc";
-import { ArrowUpRight, Check, DatabaseZap, LockKeyhole, MapPinned, ShieldCheck } from "lucide-react";
+import { ExactProvider, loadProviderSettings, maskedKey, ProviderSettings, saveProviderSettings } from "@/lib/providerSettings";
+import { ArrowUpRight, Check, DatabaseZap, KeyRound, LockKeyhole, MapPinned, Save, ShieldCheck, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 function ConfigurationLine({ icon: Icon, label, value }: { icon: typeof ShieldCheck; label: string; value: string }) {
-  return (
-    <div className="flex items-center justify-between gap-4 border-b border-white/5 py-4 last:border-0">
-      <div className="flex items-center gap-3 text-sm text-slate-400"><Icon className="h-4 w-4 text-lime-300" />{label}</div>
-      <span className="font-mono text-xs text-slate-200">{value}</span>
-    </div>
-  );
+  return <div className="flex items-center justify-between gap-4 border-b border-white/5 py-4 last:border-0"><div className="flex items-center gap-3 text-sm text-slate-400"><Icon className="h-4 w-4 text-lime-300" />{label}</div><span className="font-mono text-xs text-slate-200">{value}</span></div>;
 }
 
 export default function Settings() {
   const configuration = trpc.kgr.configuration.useQuery();
-  const isConnected = configuration.data?.configured;
+  const [settings, setSettings] = useState<ProviderSettings>(() => loadProviderSettings());
+  const update = (patch: Partial<ProviderSettings>) => setSettings(current => ({ ...current, ...patch }));
+  const selectedLabel = settings.exactProvider === "scrapingbee" ? "ScrapingBee" : "Scrapingdog";
+  const hasSelectedKey = settings.exactProvider === "scrapingbee" ? Boolean(settings.scrapingbeeApiKey || configuration.data?.scrapingbeeConfigured) : Boolean(settings.scrapingdogApiKey || configuration.data?.scrapingdogConfigured);
+  const save = () => { saveProviderSettings(settings); toast.success("Provider settings saved for this browser session."); };
+  const clear = () => { const cleared = { ...settings, serperApiKey: "", scrapingdogApiKey: "", scrapingbeeApiKey: "" }; setSettings(cleared); saveProviderSettings(cleared); toast.success("Session API-key overrides cleared. Server defaults remain available."); };
 
-  return (
-    <div className="app-grid min-h-[calc(100vh-4rem)] -m-4 p-4 sm:-m-6 sm:p-6 lg:-m-8 lg:p-8">
-      <div className="mx-auto max-w-5xl">
-        <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <div className="mb-3 flex items-center gap-2 font-mono text-[10px] font-medium tracking-[0.22em] text-lime-300"><span className="h-1.5 w-1.5 rounded-full bg-lime-300" />SECURE CONFIGURATION</div>
-            <h1 className="max-w-full text-3xl font-extrabold leading-tight tracking-tight text-slate-100 sm:text-4xl">Research data connection</h1>
-            <p className="mt-2 max-w-xl text-sm leading-6 text-slate-400">Your workspace runs live Google USA allintitle searches through Scrapingdog’s advanced SERP response, with exact total-results metadata used for KGR.</p>
-          </div>
-          <a className="inline-flex items-center gap-1.5 text-sm font-semibold text-lime-300 hover:text-lime-200" href="https://www.scrapingdog.com/google-serp-api/" target="_blank" rel="noreferrer">Scrapingdog account <ArrowUpRight className="h-4 w-4" /></a>
-        </div>
+  return <div className="app-grid min-h-[calc(100vh-4rem)] -m-4 p-4 sm:-m-6 sm:p-6 lg:-m-8 lg:p-8"><div className="mx-auto max-w-6xl">
+    <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between"><div><div className="mb-3 flex items-center gap-2 font-mono text-[10px] font-medium tracking-[.22em] text-lime-300"><span className="h-1.5 w-1.5 rounded-full bg-lime-300" />PROVIDER CONFIGURATION</div><h1 className="max-w-full text-3xl font-extrabold leading-tight tracking-tight text-slate-100 sm:text-4xl">Research data connections</h1><p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">Serper.dev handles keyword Google USA SERP discovery. Choose Scrapingdog or ScrapingBee for exact allintitle total-results metadata.</p></div><a className="inline-flex items-center gap-1.5 text-sm font-semibold text-lime-300 hover:text-lime-200" href="https://www.scrapingbee.com/documentation/google-api/" target="_blank" rel="noreferrer">Provider docs <ArrowUpRight className="h-4 w-4" /></a></div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr]">
-          <section className="panel-sheen rounded-2xl border border-white/10 bg-[#101721]/80 p-6 shadow-2xl">
-            <div className="mb-7 flex items-start justify-between gap-5">
-              <div className="flex gap-4"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-lime-300/10 text-lime-300"><DatabaseZap className="h-5 w-5" /></span><div><h2 className="font-bold text-slate-100">Scrapingdog exact-count API</h2><p className="mt-1 text-sm text-slate-500">Server-side credential vault</p></div></div>
-              <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[10px] font-medium ${isConnected ? "border-lime-300/20 bg-lime-300/10 text-lime-200" : "border-rose-400/20 bg-rose-400/10 text-rose-300"}`}><span className={`h-1.5 w-1.5 rounded-full ${isConnected ? "bg-lime-300" : "bg-rose-400"}`} />{configuration.isLoading ? "CHECKING" : isConnected ? "CONNECTED" : "NOT CONFIGURED"}</span>
-            </div>
-            <ConfigurationLine icon={LockKeyhole} label="API key" value={isConnected ? "Securely configured" : "No key detected"} />
-            <ConfigurationLine icon={MapPinned} label="Search target" value="Google · United States" />
-            <ConfigurationLine icon={ShieldCheck} label="Search mode" value="Advanced · total_results" />
-            <ConfigurationLine icon={DatabaseZap} label="Serper.dev" value={configuration.data?.serperConfigured ? "Separate diagnostic key" : "Not configured"} />
-          </section>
+    <div className="grid gap-6 lg:grid-cols-[1.15fr_.85fr]">
+      <section className="panel-sheen rounded-2xl border border-white/10 bg-[#101721]/80 p-6 shadow-2xl"><div className="mb-7 flex items-start justify-between gap-5"><div className="flex gap-4"><span className="flex h-11 w-11 items-center justify-center rounded-xl bg-lime-300/10 text-lime-300"><KeyRound className="h-5 w-5" /></span><div><h2 className="font-bold text-slate-100">Session API keys</h2><p className="mt-1 text-sm text-slate-500">Editable in this browser session</p></div></div><span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[10px] font-medium ${hasSelectedKey ? "border-lime-300/20 bg-lime-300/10 text-lime-200" : "border-amber-300/20 bg-amber-300/10 text-amber-200"}`}><span className={`h-1.5 w-1.5 rounded-full ${hasSelectedKey ? "bg-lime-300" : "bg-amber-300"}`} />{hasSelectedKey ? `${selectedLabel.toUpperCase()} READY` : "ADD A KEY"}</span></div>
+        <div className="space-y-5"><div><Label htmlFor="serper-key" className="text-xs font-semibold text-slate-300">Serper.dev API key <span className="font-normal text-slate-500">· keyword SERP search</span></Label><Input id="serper-key" type="password" value={settings.serperApiKey} onChange={event => update({ serperApiKey: event.target.value })} placeholder={configuration.data?.serperConfigured ? "Server default configured · optional override" : "Paste Serper.dev key"} className="mt-2 border-white/10 bg-[#0b1018] font-mono text-xs text-slate-200 placeholder:text-slate-600 focus-visible:ring-lime-300" /></div><div><Label htmlFor="dog-key" className="text-xs font-semibold text-slate-300">Scrapingdog API key <span className="font-normal text-slate-500">· exact total results</span></Label><Input id="dog-key" type="password" value={settings.scrapingdogApiKey} onChange={event => update({ scrapingdogApiKey: event.target.value })} placeholder={configuration.data?.scrapingdogConfigured ? "Server default configured · optional override" : "Paste Scrapingdog key"} className="mt-2 border-white/10 bg-[#0b1018] font-mono text-xs text-slate-200 placeholder:text-slate-600 focus-visible:ring-lime-300" /></div><div><Label htmlFor="bee-key" className="text-xs font-semibold text-slate-300">ScrapingBee API key <span className="font-normal text-slate-500">· exact total results</span></Label><Input id="bee-key" type="password" value={settings.scrapingbeeApiKey} onChange={event => update({ scrapingbeeApiKey: event.target.value })} placeholder={configuration.data?.scrapingbeeConfigured ? "Server default configured · optional override" : "Paste ScrapingBee key"} className="mt-2 border-white/10 bg-[#0b1018] font-mono text-xs text-slate-200 placeholder:text-slate-600 focus-visible:ring-lime-300" /></div></div>
+        <div className="mt-7 grid gap-4 sm:grid-cols-[1fr_auto]"><div><Label htmlFor="exact-provider" className="text-xs font-semibold text-slate-300">Exact-count provider</Label><select id="exact-provider" value={settings.exactProvider} onChange={event => update({ exactProvider: event.target.value as ExactProvider })} className="mt-2 h-10 w-full rounded-md border border-white/10 bg-[#0b1018] px-3 font-mono text-xs text-slate-200 outline-none focus:ring-2 focus:ring-lime-300"><option value="scrapingdog">Scrapingdog</option><option value="scrapingbee">ScrapingBee</option></select></div><label className="mt-6 flex items-center gap-2 text-xs text-slate-300"><input type="checkbox" checked={settings.fallbackEnabled} onChange={event => update({ fallbackEnabled: event.target.checked })} className="h-4 w-4 accent-lime-300" />Fallback to other provider</label></div>
+        <div className="mt-7 flex flex-wrap gap-2"><Button onClick={save} className="bg-lime-300 font-bold text-slate-950 hover:bg-lime-200"><Save className="mr-2 h-4 w-4" />Save session settings</Button><Button variant="outline" onClick={clear} className="border-white/10 text-slate-300 hover:bg-rose-400/10 hover:text-rose-300"><Trash2 className="mr-2 h-4 w-4" />Clear overrides</Button></div>
+      </section>
 
-          <aside className="rounded-2xl border border-lime-300/15 bg-lime-300/[0.06] p-6">
-            <ShieldCheck className="h-6 w-6 text-lime-300" />
-            <h2 className="mt-5 text-lg font-bold text-slate-100">Key protection</h2>
-            <p className="mt-3 text-sm leading-6 text-slate-400">The API key you supplied is stored as a protected server secret. It is never returned to the browser, included in exports, or persisted with research results.</p>
-            <div className="mt-6 flex items-center gap-2 text-xs text-lime-200"><Check className="h-4 w-4" />Session-ready configuration</div>
-          </aside>
-
-          <aside className="rounded-2xl border border-amber-300/15 bg-amber-300/[0.06] p-6 lg:col-span-2">
-            <p className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-amber-200">Exact-count transparency</p>
-            <p className="mt-3 max-w-4xl text-sm leading-6 text-slate-300">Google displays the authoritative allintitle value in <span className="font-mono text-amber-100">Tools → About N results</span>. Scrapingdog’s advanced Google response exposes the corresponding <span className="font-mono text-amber-100">search_information.total_results</span> field. Serper.dev remains separate for diagnostics and is not used as a substitute for the exact count.</p>
-          </aside>
-        </div>
-      </div>
+      <div className="space-y-6"><section className="rounded-2xl border border-white/10 bg-[#101721]/80 p-6 shadow-xl"><div className="mb-4 flex items-center gap-3"><DatabaseZap className="h-5 w-5 text-lime-300" /><h2 className="font-bold text-slate-100">Connection status</h2></div><ConfigurationLine icon={LockKeyhole} label="Active exact provider" value={selectedLabel} /><ConfigurationLine icon={MapPinned} label="Target" value="Google · United States" /><ConfigurationLine icon={ShieldCheck} label="Serper.dev" value={settings.serperApiKey ? maskedKey(settings.serperApiKey) : configuration.data?.serperConfigured ? "Server default" : "Not configured"} /><ConfigurationLine icon={Check} label="Selected key" value={hasSelectedKey ? "Ready" : "Missing"} /></section><aside className="rounded-2xl border border-amber-300/15 bg-amber-300/[.06] p-6"><ShieldCheck className="h-6 w-6 text-amber-200" /><h2 className="mt-5 text-lg font-bold text-slate-100">Session-only protection</h2><p className="mt-3 text-sm leading-6 text-slate-400">Keys are stored in this browser’s session storage, sent only over HTTPS for analysis requests, never written to the database, and never included in CSV exports. Clearing the browser session removes your overrides.</p><div className="mt-6 flex items-center gap-2 text-xs text-amber-100"><Check className="h-4 w-4" />Serper stays separate from exact-count provider</div></aside></div>
     </div>
-  );
+  </div></div>;
 }

@@ -20,10 +20,11 @@ export const appRouter = router({
   }),
   kgr: router({
     configuration: publicProcedure.query(() => ({
-      configured: Boolean(process.env.SCRAPINGDOG_API_KEY),
-      exactCountProvider: "Scrapingdog",
+      configured: Boolean(process.env.SCRAPINGDOG_API_KEY || process.env.SCRAPINGBEE_API_KEY),
+      exactCountProvider: "Scrapingdog or ScrapingBee",
       serperConfigured: Boolean(process.env.SERPER_API_KEY),
       scrapingdogConfigured: Boolean(process.env.SCRAPINGDOG_API_KEY),
+      scrapingbeeConfigured: Boolean(process.env.SCRAPINGBEE_API_KEY),
       region: "United States",
       engine: "Google",
     })),
@@ -32,14 +33,17 @@ export const appRouter = router({
         z.object({
           keyword: z.string().trim().min(1, "A keyword is required.").max(240, "Keywords must be 240 characters or fewer."),
           monthlySearchVolume: z.number().finite().positive("Monthly volume must be greater than zero.").max(100_000_000),
+          exactProvider: z.enum(["scrapingdog", "scrapingbee"]).default("scrapingdog"),
+          fallbackProvider: z.enum(["scrapingdog", "scrapingbee"]).optional(),
+          serperApiKey: z.string().max(300).optional(),
+          scrapingdogApiKey: z.string().max(300).optional(),
+          scrapingbeeApiKey: z.string().max(300).optional(),
         }),
       )
       .mutation(async ({ input }) => {
-        const apiKey = process.env.SCRAPINGDOG_API_KEY;
-        if (!apiKey) {
-          throw new Error("Scrapingdog is not configured. Add SCRAPINGDOG_API_KEY in project settings.");
-        }
-        return analyzeKeyword({ ...input, apiKey });
+        const hasExactKey = input.exactProvider === "scrapingbee" ? (input.scrapingbeeApiKey || process.env.SCRAPINGBEE_API_KEY) : (input.scrapingdogApiKey || process.env.SCRAPINGDOG_API_KEY);
+        if (!hasExactKey) throw new Error(`${input.exactProvider === "scrapingbee" ? "ScrapingBee" : "Scrapingdog"} is not configured. Add its key in API settings.`);
+        return analyzeKeyword(input);
       }),
   }),
 

@@ -81,3 +81,11 @@ All code, automated tests, direct live-provider verification, type-check, produc
 - [x] Run a real no-sign-in browser verification in public mode: add a keyword, set a volume, execute analysis, and confirm the rendered provider-quota message.
 - [x] Capture public-mode mobile screenshots for the Research Lab and API Settings pages after auth removal.
 - [x] Save a post-auth-removal checkpoint after public-flow verification.
+
+- [x] Add secure Settings fields to enter, replace, clear, and select Serper.dev, Scrapingdog, and ScrapingBee keys.
+- [x] Keep Serper.dev as the keyword/SERP search provider and route exact-result retrieval through selected Scrapingdog or ScrapingBee.
+- [x] Implement provider selection and optional fallback behavior without persisting keys in research rows; session overrides are sent only over HTTPS and provider secrets remain out of exports.
+- [x] Update Settings and dashboard status messaging for active providers and missing/invalid keys.
+- [x] Add provider contract tests, type-check, production build, responsive verification, and save a new checkpoint.
+
+- [ ] Save a new checkpoint after the provider-settings and ScrapingBee integration changes, then update this checklist with the confirmed version ID.

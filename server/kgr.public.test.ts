@@ -17,6 +17,7 @@ describe("public KGR access", () => {
 
     expect(configuration.region).toBe("United States");
     expect(configuration.engine).toBe("Google");
-    expect(configuration.exactCountProvider).toBe("Scrapingdog");
+    expect(configuration.exactCountProvider).toBe("Scrapingdog or ScrapingBee");
+    expect(configuration).toHaveProperty("scrapingbeeConfigured");
   });
 });

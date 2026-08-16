@@ -22,8 +22,8 @@ describe("KGR calculation", () => {
     expect(readTotalResults({})).toBeNull();
   });
 
-  it("quotes multi-word phrases exactly for Google allintitle searches", () => {
-    expect(formatAllintitleQuery("What can give a false-positive on a PET scan?")).toBe('allintitle:"What can give a false-positive on a PET scan?"');
-    expect(formatAllintitleQuery("What can give a false-positive on a PET scan?", false)).toBe("allintitle:What can give a false-positive on a PET scan?");
+  it("supports the approved unquoted default and optional quoted allintitle forms", () => {
+    expect(formatAllintitleQuery("What can give a false-positive on a PET scan?")).toBe("allintitle:What can give a false-positive on a PET scan?");
+    expect(formatAllintitleQuery("What can give a false-positive on a PET scan?", true)).toBe('allintitle:"What can give a false-positive on a PET scan?"');
   });
 });
