@@ -21,3 +21,15 @@ The deployed endpoint `https://kgr-pro-gsa4.vercel.app/api/trpc/kgr.configuratio
 ## Vercel crash identifier
 
 A second inspection confirms the same Vercel response: HTTP 500, code `FUNCTION_INVOCATION_FAILED`, deployment ID `sin1::ncmx8-1786896156494-6e922025b329`. The error page does not expose a stack trace publicly; Vercel says the connection and platform are working and the serverless function itself crashed.
+
+## Vercel project/deployment state
+
+The connected Vercel dashboard shows projects `kgr-pro` and `kgr-pro-gsa4`, both linked to `SorenKivra/KGR-Pro`. The latest visible deployment cards still show the earlier checkpoint message mentioning the shared Express app and `vercel.json`; the current alias `kgr-pro-gsa4.vercel.app` continues to return `FUNCTION_INVOCATION_FAILED` after the GitHub push. Vercel dashboard access is available in the connected browser, but no function stack trace is shown on the public error page.
+
+## Definitive root cause from Vercel Logs
+
+Vercel logs show every API request fails before Express starts:
+
+`Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/var/task/server/app' imported from /var/task/api/index.js`
+
+The Vercel Node runtime is executing the TypeScript API entrypoint as ESM without resolving the extensionless `../server/app` import. This is a deployment bundling/module-resolution problem, not an API key, database, or frontend button problem. The fix must make the Vercel function bundle its server dependencies or use runtime-resolvable `.js` imports.

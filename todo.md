@@ -131,3 +131,5 @@ All code, automated tests, direct live-provider verification, type-check, produc
 - [x] Fix confirmed deployment/runtime issues locally; the repaired commit still requires Vercel redeployment and live endpoint verification.
 
 - [ ] Redeploy the repaired commit through Vercel and confirm `/api/trpc/kgr.configuration` returns 200 and Run KGR analysis starts successfully.
+
+- [x] Replace Vercel’s extensionless ESM server import with a bundled `api/index.js` artifact and verify the generated bundle returns HTTP 200 locally.
