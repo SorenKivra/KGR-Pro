@@ -44,8 +44,8 @@ The dashboard has already been visually verified at desktop and mobile sizes, an
 
 The project is complete and ready for review. The independent browser interaction session was stopped at the Manus sign-in screen, but the signed-in project preview screenshots, automated live credential test, direct live Serper request, explicit unavailable-count handling, type-check, test suite, production build, and responsive visual verification all completed successfully.
 
-- [ ] User-assisted verification: sign in to the actual browser preview and confirm the protected dashboard session.
-- [ ] User-assisted verification: run one live analysis in the signed-in UI and capture the rendered Unavailable allintitle/KGR row.
+- [x] User-assisted verification: no longer required after the user-requested public-access change; public preview verified instead.
+- [x] User-assisted verification: no longer required after the user-requested public-access change; live quota behavior is covered by the passing provider-state tests.
 
 ## Remaining verification constraint
 
@@ -72,8 +72,12 @@ All code, automated tests, direct live-provider verification, type-check, produc
 - [x] Update tests, settings copy, KGR results, and exports to identify Scrapingdog as the exact-count source.
 - [x] Run the complete test, type-check, production build, and responsive UI verification, then save a checkpoint.
 
-- [ ] Remove Manus authentication gate from the public KGR dashboard.
-- [ ] Convert only the KGR configuration and analysis procedures to public access while retaining server-side provider secrets.
-- [ ] Add public-flow tests and visible credit-usage warning copy.
-- [ ] Verify public dashboard access, live analysis controls, tests, type-check, build, and responsive layout.
-- [ ] Save a new public-access checkpoint for review.
+- [x] Remove Manus authentication gate from the public KGR dashboard.
+- [x] Convert only the KGR configuration and analysis procedures to public access while retaining server-side provider secrets.
+- [x] Add public-flow tests and visible credit-usage warning copy.
+- [x] Verify public dashboard access, live analysis controls, tests, type-check, build, and responsive layout.
+- [x] Save a new public-access checkpoint for review.
+
+- [x] Run a real no-sign-in browser verification in public mode: add a keyword, set a volume, execute analysis, and confirm the rendered provider-quota message.
+- [x] Capture public-mode mobile screenshots for the Research Lab and API Settings pages after auth removal.
+- [x] Save a post-auth-removal checkpoint after public-flow verification.

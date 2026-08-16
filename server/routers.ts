@@ -19,7 +19,7 @@ export const appRouter = router({
     }),
   }),
   kgr: router({
-    configuration: protectedProcedure.query(() => ({
+    configuration: publicProcedure.query(() => ({
       configured: Boolean(process.env.SCRAPINGDOG_API_KEY),
       exactCountProvider: "Scrapingdog",
       serperConfigured: Boolean(process.env.SERPER_API_KEY),
@@ -27,7 +27,7 @@ export const appRouter = router({
       region: "United States",
       engine: "Google",
     })),
-    analyzeKeyword: protectedProcedure
+    analyzeKeyword: publicProcedure
       .input(
         z.object({
           keyword: z.string().trim().min(1, "A keyword is required.").max(240, "Keywords must be 240 characters or fewer."),

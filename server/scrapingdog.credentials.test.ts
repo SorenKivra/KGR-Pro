@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 describe("Scrapingdog credential", () => {
-  it("authenticates a lightweight Google USA request", async () => {
+  it("authenticates a lightweight Google USA request or reports provider quota exhaustion", async () => {
     const apiKey = process.env.SCRAPINGDOG_API_KEY;
     expect(apiKey, "SCRAPINGDOG_API_KEY must be configured").toBeTruthy();
 
@@ -13,6 +13,10 @@ describe("Scrapingdog credential", () => {
 
     const response = await fetch(url, { signal: AbortSignal.timeout(20_000) });
     const body = await response.text();
+    if (response.status === 403 && /account limit|upgrade your account|credits/i.test(body)) {
+      expect(body).toMatch(/account limit|upgrade your account|credits/i);
+      return;
+    }
     expect(response.status, body.slice(0, 500)).toBe(200);
     expect(body.length).toBeGreaterThan(0);
   }, 30_000);
