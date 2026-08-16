@@ -11,3 +11,5 @@ Sources consulted:
 - Google Custom Search JSON API response reference: https://developers.google.com/custom-search/v1/reference/rest/v1/Search
 
 The Google Custom Search reference documents `searchInformation.totalResults` and `formattedTotalResults`, but those fields belong to Google Custom Search JSON API and were not present in the live Serper.dev response observed for this project. Organic result length must not be used as a substitute.
+
+Direct Google verification: opening the exact Google USA allintitle URL in the browser reached a Google CAPTCHA page. The page exposed the query and organic listings but not the Tools → About summary. A server-side curl request also timed out. This confirms the exact About-results workflow requires a browser/session or a SERP provider that returns total-results metadata; it cannot be reliably implemented with the current normal Serper JSON response alone.

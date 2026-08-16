@@ -10,9 +10,9 @@ afterEach(() => {
 
 describe("live allintitle analysis service", () => {
   it("sends the exact USA allintitle request and returns its KGR result", async () => {
-    const fetchMock = vi.fn().mockResolvedValue(
-      new Response(JSON.stringify({ searchInformation: { totalResults: 125 } }), { status: 200 }),
-    );
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify({ organic: [], credits: 1 }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ text: "About 125 results (0.38s)" }), { status: 200 }));
     globalThis.fetch = fetchMock;
 
     const result = await analyzeKeyword({
@@ -21,7 +21,7 @@ describe("live allintitle analysis service", () => {
       apiKey: "test-key",
     });
 
-    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(fetchMock).toHaveBeenCalledTimes(2);
     const [, options] = fetchMock.mock.calls[0] as [string, RequestInit];
     expect(options.headers).toMatchObject({ "X-API-KEY": "test-key" });
     expect(JSON.parse(String(options.body))).toMatchObject({

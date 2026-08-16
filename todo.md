@@ -51,7 +51,14 @@ The project is complete and ready for review. The independent browser interactio
 
 All code, automated tests, direct live-provider verification, type-check, production build, and project-preview screenshots are complete. The two items above require an authenticated interactive browser session and cannot be completed from the unauthenticated browser state without user takeover.
 
-- [ ] Replace unavailable allintitle handling with extraction of Google’s exact “About N results” count from the Serper.dev response or supported result metadata.
-- [ ] Ensure each query is formed as `allintitle:"keyword phrase"` and preserve the exact count used for KGR.
-- [ ] Add tests for formatted About-results strings such as `About 337 results (0.38s)` and verify KGR output from the parsed count.
-- [ ] Run real keyword verification, rebuild, and save a corrected checkpoint.
+- [x] Add exact About-results parsing for any supported provider payload; Serper.dev’s current live payload omits the field, so unavailable remains explicit.
+- [x] Ensure each query is formed as the user-approved `allintitle:keyword phrase` syntax and preserve any exact count when provided.
+- [x] Add tests for formatted About-results strings such as `About 337 results (0.38s)` and verify KGR output from the parsed count.
+- [ ] Run real keyword verification and save a corrected checkpoint after the alternate provider credential is available.
+
+- [ ] Treat Google Tools → About results as the authoritative allintitle count source, e.g. parse `About 337 results (0.38s)` as 337.
+- [ ] Add a user-visible provider mode or configuration for the exact About-results extraction path when Serper.dev JSON omits the Google UI summary (requires the alternate provider credential requested from the user).
+- [x] Verify the clarified workflow with the user’s example and keep KGR computation truthful when the exact Google summary cannot be fetched.
+
+- [x] Support the user-facing `allintitle:keyword phrase` syntax while preserving safe multi-word query construction internally.
+- [x] Verify the preferred syntax does not change the exact About-results requirement or claim counts unavailable from Serper.dev.

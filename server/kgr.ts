@@ -18,11 +18,30 @@ export type KgrResult = {
 type SerperSearchResponse = {
   searchInformation?: {
     totalResults?: number | string;
+    formattedTotalResults?: string;
   };
+  resultStats?: string;
+  text?: string;
+  markdown?: string;
+  html?: string;
   message?: string;
 };
 
 const SERPER_ENDPOINT = "https://google.serper.dev/search";
+const SERPER_SCRAPE_ENDPOINT = "https://scrape.serper.dev";
+
+export function formatAllintitleQuery(keyword: string) {
+  const phrase = keyword.trim().replace(/\\/g, "\\\\").replace(/\"/g, '\\\"');
+  return `allintitle:${phrase}`;
+}
+
+export function parseAboutResults(value: unknown): number | null {
+  if (typeof value !== "string") return null;
+  const match = value.match(/about\s+([\d,]+(?:\.\d+)?)\s+results?/i) ?? value.match(/([\d,]+)\s+results?/i);
+  if (!match?.[1]) return null;
+  const parsed = Number.parseInt(match[1].replace(/,/g, ""), 10);
+  return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : null;
+}
 
 export function getKgrTier(kgr: number): KgrTier {
   if (kgr < 0.25) return "hot";
@@ -42,17 +61,30 @@ export function calculateKgr(allintitleCount: number, monthlySearchVolume: numbe
 
 export function readTotalResults(payload: SerperSearchResponse): number | null {
   const rawValue = payload.searchInformation?.totalResults;
-  if (typeof rawValue === "number" && Number.isFinite(rawValue) && rawValue >= 0) {
-    return rawValue;
-  }
-
+  if (typeof rawValue === "number" && Number.isFinite(rawValue) && rawValue >= 0) return rawValue;
   if (typeof rawValue === "string") {
     const normalized = rawValue.replace(/[^0-9]/g, "");
     const parsed = Number.parseInt(normalized, 10);
     if (Number.isSafeInteger(parsed) && parsed >= 0) return parsed;
   }
+  return [payload.searchInformation?.formattedTotalResults, payload.resultStats, payload.text, payload.markdown, payload.html]
+    .map(parseAboutResults).find((value): value is number => value !== null) ?? null;
+}
 
-  return null;
+async function scrapeGoogleAboutResults(keyword: string, apiKey: string): Promise<number | null> {
+  const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(formatAllintitleQuery(keyword))}&gl=us&hl=en`;
+  try {
+    const response = await fetch(SERPER_SCRAPE_ENDPOINT, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-API-KEY": apiKey },
+      body: JSON.stringify({ url: googleUrl }),
+    });
+    if (!response.ok) return null;
+    const payload = (await response.json().catch(() => ({}))) as SerperSearchResponse;
+    return readTotalResults(payload);
+  } catch {
+    return null;
+  }
 }
 
 export async function fetchGoogleUsaAllintitle(keyword: string, apiKey: string) {
@@ -67,7 +99,7 @@ export async function fetchGoogleUsaAllintitle(keyword: string, apiKey: string) 
         "X-API-KEY": apiKey,
       },
       body: JSON.stringify({
-        q: `allintitle:${keyword}`,
+        q: formatAllintitleQuery(keyword),
         gl: "us",
         hl: "en",
         autocorrect: false,
@@ -86,7 +118,8 @@ export async function fetchGoogleUsaAllintitle(keyword: string, apiKey: string) 
       });
     }
 
-    return readTotalResults(payload);
+    const exactCount = readTotalResults(payload);
+    return exactCount ?? await scrapeGoogleAboutResults(keyword, apiKey);
   } catch (error) {
     if (error instanceof TRPCError) throw error;
     if (error instanceof Error && error.name === "AbortError") {
