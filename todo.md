@@ -119,6 +119,9 @@ All code, automated tests, direct live-provider verification, type-check, produc
 - [x] Confirm and enforce final KGR = allintitle result count ÷ monthly search volume across service, UI, and exports.
 - [x] Add explicit formula regression coverage, run verification, and save the final formula checkpoint.
 
-- [ ] Audit project files for secrets and generated artifacts before GitHub export.
-- [ ] Create or use a private GitHub repository named KGR Pro and push the complete project.
-- [ ] Verify the remote repository, branch, and pushed commit URL.
+- [x] Audit project files for secrets and generated artifacts before GitHub export.
+- [x] Create or use a private GitHub repository named KGR Pro and push the complete project.
+- [x] Verify the remote repository, branch, and pushed commit URL.
+
+- [x] Add an explicit Vercel deployment configuration so the React client is served from the correct output and API requests reach a compatible serverless handler.
+- [x] Verify the Vercel build contract locally, add regression checks where appropriate, and save a deployment-fix checkpoint.
