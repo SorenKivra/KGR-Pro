@@ -6,6 +6,11 @@ describe("KGR calculation", () => {
     expect(calculateKgr(50, 400)).toBe(0.125);
   });
 
+  it("uses allintitle count divided by monthly search volume for the final KGR", () => {
+    expect(calculateKgr(337, 1200)).toBeCloseTo(337 / 1200, 10);
+    expect(calculateKgr(25, 50)).toBe(0.5);
+  });
+
   it("classifies all KGR threshold bands consistently", () => {
     expect(getKgrTier(0.2499)).toBe("hot");
     expect(getKgrTier(0.25)).toBe("ok");

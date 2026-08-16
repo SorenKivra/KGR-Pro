@@ -115,3 +115,6 @@ All code, automated tests, direct live-provider verification, type-check, produc
 
 - [x] Remove the minimum batch-size requirement so any positive keyword count can be analyzed, while retaining the safe maximum and large-batch chunking.
 - [x] Update dashboard copy and regression coverage for flexible batch sizes, then verify and checkpoint the change.
+
+- [x] Confirm and enforce final KGR = allintitle result count ÷ monthly search volume across service, UI, and exports.
+- [x] Add explicit formula regression coverage, run verification, and save the final formula checkpoint.
