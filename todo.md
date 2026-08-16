@@ -133,3 +133,7 @@ All code, automated tests, direct live-provider verification, type-check, produc
 - [ ] Redeploy the repaired commit through Vercel and confirm `/api/trpc/kgr.configuration` returns 200 and Run KGR analysis starts successfully.
 
 - [x] Replace Vercel’s extensionless ESM server import with a bundled `api/index.js` artifact and verify the generated bundle returns HTTP 200 locally.
+
+- [ ] Fix Vercel’s reported TypeScript errors caused by incorrect Express type resolution and ensure the build command does not leave a failing `check` step.
+- [ ] Verify the repaired Vercel build, API bundle, Run KGR request path, and push the fix to GitHub.
+- [ ] Redeploy the repaired commit in Vercel and confirm the deployed API and Run KGR analysis flow.
