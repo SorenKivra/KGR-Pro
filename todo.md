@@ -134,6 +134,9 @@ All code, automated tests, direct live-provider verification, type-check, produc
 
 - [x] Replace Vercel’s extensionless ESM server import with a bundled `api/index.js` artifact and verify the generated bundle returns HTTP 200 locally.
 
-- [ ] Fix Vercel’s reported TypeScript errors caused by incorrect Express type resolution and ensure the build command does not leave a failing `check` step.
-- [ ] Verify the repaired Vercel build, API bundle, Run KGR request path, and push the fix to GitHub.
+- [x] Fix Vercel’s reported TypeScript errors caused by incorrect Express type resolution and ensure the build command does not leave a failing `check` step; the original errors came from Vercel compiling the old `api/index.ts` function rather than the bundled artifact.
+- [x] Verify the repaired Vercel build, API bundle, Run KGR request path locally, and push the fix to GitHub commit `23314d7`.
 - [ ] Redeploy the repaired commit in Vercel and confirm the deployed API and Run KGR analysis flow.
+
+- [x] Smoke-test the bundled Vercel artifact against the actual KGR analysis tRPC procedure and confirm the Run KGR action starts with a typed response; local smoke test returned HTTP 200 and a typed unavailable result for the intentionally invalid provider key.
+- [ ] After Vercel redeployment, verify both the configuration endpoint and Run KGR flow on the live deployment.

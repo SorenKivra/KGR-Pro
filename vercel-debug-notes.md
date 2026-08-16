@@ -33,3 +33,7 @@ Vercel logs show every API request fails before Express starts:
 `Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/var/task/server/app' imported from /var/task/api/index.js`
 
 The Vercel Node runtime is executing the TypeScript API entrypoint as ESM without resolving the extensionless `../server/app` import. This is a deployment bundling/module-resolution problem, not an API key, database, or frontend button problem. The fix must make the Vercel function bundle its server dependencies or use runtime-resolvable `.js` imports.
+
+## Post-push deployment check
+
+The public API still returns `FUNCTION_INVOCATION_FAILED` after commit `23314d7` was pushed. Vercel Logs continue to show `ERR_MODULE_NOT_FOUND` for `/var/task/server/app` imported from `/var/task/api/index.js`. The active Vercel project has not picked up the bundled `api/index.js` configuration yet; this is now a deployment/project-source issue rather than a local build issue. The GitHub repository contains `vercel.json` with `build:vercel-api`, `api/index.js`, `api/index.ts`, `package.json`, and `server/app.ts`.
