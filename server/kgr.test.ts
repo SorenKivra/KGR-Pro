@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calculateKgr, formatAllintitleQuery, getKgrTier, parseAboutResults, readTotalResults } from "./kgr";
+import { calculateKgr, formatAllintitleQuery, getKgrTier, isClassicKgrEligible, parseAboutResults, readTotalResults } from "./kgr";
 
 describe("KGR calculation", () => {
   it("computes the ratio from authentic result and volume inputs", () => {
@@ -24,6 +24,12 @@ describe("KGR calculation", () => {
 
   it("supports the approved unquoted default and optional quoted allintitle forms", () => {
     expect(formatAllintitleQuery("What can give a false-positive on a PET scan?")).toBe("allintitle:What can give a false-positive on a PET scan?");
-    expect(formatAllintitleQuery("What can give a false-positive on a PET scan?", true)).toBe('allintitle:"What can give a false-positive on a PET scan?"');
+    expect(formatAllintitleQuery("What can give a false-positive on a PET scan?", "quoted")).toBe('allintitle:"What can give a false-positive on a PET scan?"');
+  });
+
+  it("marks only monthly volumes below 250 as classic KGR eligible", () => {
+    expect(isClassicKgrEligible(249)).toBe(true);
+    expect(isClassicKgrEligible(250)).toBe(false);
+    expect(isClassicKgrEligible(1000)).toBe(false);
   });
 });

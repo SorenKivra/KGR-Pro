@@ -32,3 +32,15 @@ The quoted result closely matches the user’s screenshot (`About 337 results (0
 Official documentation: https://www.scrapingbee.com/documentation/google-api/ and https://www.scrapingbee.com/features/google/
 
 ScrapingBee’s Google endpoint is `https://app.scrapingbee.com/api/v1/google` and accepts `search`, `country_code` (default `us`), `search_type`, and an `Authorization: Bearer <API_KEY>` header. The structured response includes `meta_data.number_of_results`, `meta_data.number_of_organic_results`, and the Google result URL. The documentation example confirms that `number_of_results` is the provider total-results metadata needed for KGR when returned for an allintitle query. ScrapingBee advertises 1,000 free API credits with no credit card required on its Google API page.
+
+## KGR formula review — 2026-08-16
+
+Current guidance consistently defines KGR as **allintitle result count divided by monthly search volume**: `KGR = allintitle results / monthly search volume`. The classic convention also limits the target keyword set to monthly volume below 250, and treats KGR below 0.25 as the “golden” band. For volume above 250, the formula can still be computed as a ratio, but it should be labeled as an extended/diagnostic ratio rather than the classic KGR qualification. The implementation should therefore preserve the ratio, add a `classicEligible` indicator for volume < 250, and avoid multiplying by 100 unless explicitly displaying a percentage.
+
+Sources reviewed:
+- https://keyword.com/blog/keyword-golden-ratio-everything-you-need-to-know-about-kgr/ — formula and 250-volume cap.
+- https://mangools.com/blog/keyword-golden-ratio/ — threshold example at KGR 0.25.
+- https://writerzen.freshdesk.com/support/solutions/articles/69000441376-all-in-title-and-kgr-keyword-golden-ratio- — formula definition.
+- https://allintitle.co/blog/everything-you-need-to-now-about-keyword-golden-ratio/ — tier interpretation.
+
+Correction decision: the arithmetic ratio itself was not reversed; the missing distinction was the classic KGR eligibility rule and the boundary convention. The extended dashboard will show `KGR = allintitle / volume`, `classicEligible = monthly volume < 250`, HOT when KGR < 0.25, OK when 0.25 <= KGR < 1, and Too Competitive when KGR >= 1. Exact equality at 0.25 is not HOT.
