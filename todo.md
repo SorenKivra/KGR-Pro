@@ -118,3 +118,7 @@ All code, automated tests, direct live-provider verification, type-check, produc
 
 - [x] Confirm and enforce final KGR = allintitle result count ÷ monthly search volume across service, UI, and exports.
 - [x] Add explicit formula regression coverage, run verification, and save the final formula checkpoint.
+
+- [ ] Audit project files for secrets and generated artifacts before GitHub export.
+- [ ] Create or use a private GitHub repository named KGR Pro and push the complete project.
+- [ ] Verify the remote repository, branch, and pushed commit URL.
