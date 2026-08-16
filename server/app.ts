@@ -7,7 +7,7 @@ import { appRouter } from "./routers";
 import { createContext } from "./_core/context";
 import { serveStatic, setupVite } from "./_core/vite";
 
-export async function createApp(options: { development?: boolean; staticFiles?: boolean } = {}) {
+export function createApp(options: { staticFiles?: boolean } = {}) {
   const app = express();
 
   app.use(express.json({ limit: "50mb" }));
@@ -24,10 +24,6 @@ export async function createApp(options: { development?: boolean; staticFiles?: 
     }),
   );
 
-  if (options.development) {
-    throw new Error("Development Vite middleware requires the local server instance");
-  }
-
   if (options.staticFiles) {
     serveStatic(app);
   }
@@ -36,7 +32,7 @@ export async function createApp(options: { development?: boolean; staticFiles?: 
 }
 
 export async function createDevelopmentApp(server: import("http").Server) {
-  const app = await createApp();
+  const app = createApp();
   await setupVite(app, server);
   return app;
 }

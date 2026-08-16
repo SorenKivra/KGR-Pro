@@ -125,3 +125,9 @@ All code, automated tests, direct live-provider verification, type-check, produc
 
 - [x] Add an explicit Vercel deployment configuration so the React client is served from the correct output and API requests reach a compatible serverless handler.
 - [x] Verify the Vercel build contract locally, add regression checks where appropriate, and save a deployment-fix checkpoint.
+
+- [x] Compare the complete local project tree and tracked commit against GitHub, including backend, schema, migrations, API entrypoint, and deployment configuration.
+- [x] Reproduce the Vercel API connection failure and trace the Run KGR analysis request from button click through tRPC and provider calls.
+- [x] Fix confirmed deployment/runtime issues locally; the repaired commit still requires Vercel redeployment and live endpoint verification.
+
+- [ ] Redeploy the repaired commit through Vercel and confirm `/api/trpc/kgr.configuration` returns 200 and Run KGR analysis starts successfully.
