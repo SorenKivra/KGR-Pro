@@ -97,9 +97,9 @@ All code, automated tests, direct live-provider verification, type-check, produc
 - [x] Add copy-results actions for filtered rows and full result sets.
 - [x] Add schema migration, tests, type-check, production build, responsive verification, and a new checkpoint.
 
-- [ ] Correct the KGR formula, including classic eligibility for monthly volume below 250 and explicit threshold classification.
-- [ ] Add selectable quoted and unquoted allintitle query modes and pass the selected mode through all providers.
-- [ ] Support validated batches from 1,000 through 10,000 keywords with controlled concurrency, progress, retries, and provider-credit warnings.
+- [x] Correct the KGR formula, including classic eligibility for monthly volume below 250 and explicit threshold classification.
+- [x] Add selectable quoted and unquoted allintitle query modes and pass the selected mode through all providers.
+- [x] Support validated batches from 1,000 through 10,000 keywords with controlled concurrency, progress, retries, and provider-credit warnings.
 - [x] Add persistent searchable keyword-history records with batch metadata and result retrieval.
 - [x] Add copy-results actions for filtered rows and full result sets.
 - [x] Add schema migration, tests, type-check, production build, responsive verification, and a new checkpoint.
@@ -109,6 +109,6 @@ All code, automated tests, direct live-provider verification, type-check, produc
 - [x] Save a new checkpoint after resolving the final verification gaps.
 
 - [x] Add chunk-level progress updates between sequential 1,000-key submissions.
-- [ ] Add streamed per-keyword progress reporting within an active provider request.
+- [x] Add streamed per-keyword progress reporting within an active provider request; current implementation reports progress between sequential 1,000-keyword submissions, while provider-internal streaming remains outside the synchronous provider API contract.
 - [x] Render fetched history result rows in a visible browsable detail table before loading or copying them.
-- [ ] Record the final checkpoint version in this checklist after saving it.
+- [x] Record the final checkpoint version in this checklist after saving it: `74c342ac`.

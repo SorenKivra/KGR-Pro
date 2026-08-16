@@ -56,7 +56,7 @@ export const appRouter = router({
         serperApiKey: z.string().max(300).optional(),
         scrapingdogApiKey: z.string().max(300).optional(),
         scrapingbeeApiKey: z.string().max(300).optional(),
-        keywords: z.array(z.object({ keyword: z.string().trim().min(1).max(240), monthlySearchVolume: z.number().int().positive().max(100_000_000) })).min(1000).max(10000),
+        keywords: z.array(z.object({ keyword: z.string().trim().min(1).max(240), monthlySearchVolume: z.number().int().positive().max(100_000_000) })).min(1).max(10000),
       }))
       .mutation(async ({ input }) => {
         const hasExactKey = input.exactProvider === "scrapingbee" ? (input.scrapingbeeApiKey || process.env.SCRAPINGBEE_API_KEY) : (input.scrapingdogApiKey || process.env.SCRAPINGDOG_API_KEY);
