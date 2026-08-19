@@ -140,3 +140,7 @@ All code, automated tests, direct live-provider verification, type-check, produc
 
 - [x] Smoke-test the bundled Vercel artifact against the actual KGR analysis tRPC procedure and confirm the Run KGR action starts with a typed response; local smoke test returned HTTP 200 and a typed unavailable result for the intentionally invalid provider key.
 - [ ] After Vercel redeployment, verify both the configuration endpoint and Run KGR flow on the live deployment.
+
+- [ ] Obtain the newest Vercel deployment/build/runtime evidence for the latest GitHub commit.
+- [ ] Resolve any remaining live Vercel runtime issue and verify the live API plus Run KGR flow.
+- [ ] Save the final deployment checkpoint and record the confirmed live status.

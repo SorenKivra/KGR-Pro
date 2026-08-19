@@ -1,7 +1,8 @@
 import "dotenv/config";
 import { createServer } from "http";
 import net from "net";
-import { createApp, createDevelopmentApp } from "../app";
+import { createApp } from "../app";
+import { serveStatic, setupVite } from "./vite";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise((resolve) => {
@@ -22,9 +23,13 @@ async function findAvailablePort(startPort = 3000): Promise<number> {
 
 async function startServer() {
   const server = createServer();
-  const app = process.env.NODE_ENV === "development"
-    ? await createDevelopmentApp(server)
-    : await createApp({ staticFiles: true });
+  const app = createApp();
+
+  if (process.env.NODE_ENV === "development") {
+    await setupVite(app, server);
+  } else {
+    serveStatic(app);
+  }
 
   server.on("request", app);
 

@@ -37,3 +37,7 @@ The Vercel Node runtime is executing the TypeScript API entrypoint as ESM withou
 ## Post-push deployment check
 
 The public API still returns `FUNCTION_INVOCATION_FAILED` after commit `23314d7` was pushed. Vercel Logs continue to show `ERR_MODULE_NOT_FOUND` for `/var/task/server/app` imported from `/var/task/api/index.js`. The active Vercel project has not picked up the bundled `api/index.js` configuration yet; this is now a deployment/project-source issue rather than a local build issue. The GitHub repository contains `vercel.json` with `build:vercel-api`, `api/index.js`, `api/index.ts`, `package.json`, and `server/app.ts`.
+
+## Post-redeployment verification
+
+After the user reported redeployment, `https://kgr-pro-gsa4.vercel.app/api/trpc/kgr.configuration` still returned HTTP 500 `FUNCTION_INVOCATION_FAILED` with request ID `sin1::sd6qf-1786897587553-ada69647529f`. The Vercel logs page opened in the connected browser but then presented a Vercel login page, so the latest runtime stack trace could not be read from this session. The live deployment is not yet verified healthy.
