@@ -144,3 +144,5 @@ All code, automated tests, direct live-provider verification, type-check, produc
 - [x] Obtain the newest Vercel deployment/build/runtime evidence for the latest GitHub commit; the live alias still returned `FUNCTION_INVOCATION_FAILED`, requiring the latest repair to be redeployed.
 - [x] Resolve the remaining local live Vercel runtime issue by removing Vite-only imports from the serverless bundle and verify the API plus Run KGR flow locally.
 - [ ] Save the final deployment checkpoint and record the confirmed live status.
+
+- [x] Remove the conflicting `api/index.ts` source path so Vercel can deploy only the generated `api/index.js` function, then verify the local production build, API bundle, and 14-test suite.

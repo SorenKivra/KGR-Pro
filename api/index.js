@@ -933,9 +933,9 @@ function createApp() {
   return app2;
 }
 
-// api/index.ts
+// server/vercel.ts
 var app = createApp();
-var index_default = app;
+var vercel_default = app;
 export {
-  index_default as default
+  vercel_default as default
 };
