@@ -135,12 +135,12 @@ All code, automated tests, direct live-provider verification, type-check, produc
 - [x] Replace Vercel’s extensionless ESM server import with a bundled `api/index.js` artifact and verify the generated bundle returns HTTP 200 locally.
 
 - [x] Fix Vercel’s reported TypeScript errors caused by incorrect Express type resolution and ensure the build command does not leave a failing `check` step; the original errors came from Vercel compiling the old `api/index.ts` function rather than the bundled artifact.
-- [x] Verify the repaired Vercel build, API bundle, Run KGR request path locally, and push the fix to GitHub commit `23314d7`.
+- [x] Verify the repaired Vercel build, API bundle, Run KGR request path locally, and prepare the fix for GitHub synchronization; the latest local repair is commit `632d918`.
 - [ ] Redeploy the repaired commit in Vercel and confirm the deployed API and Run KGR analysis flow.
 
 - [x] Smoke-test the bundled Vercel artifact against the actual KGR analysis tRPC procedure and confirm the Run KGR action starts with a typed response; local smoke test returned HTTP 200 and a typed unavailable result for the intentionally invalid provider key.
 - [ ] After Vercel redeployment, verify both the configuration endpoint and Run KGR flow on the live deployment.
 
-- [ ] Obtain the newest Vercel deployment/build/runtime evidence for the latest GitHub commit.
-- [ ] Resolve any remaining live Vercel runtime issue and verify the live API plus Run KGR flow.
+- [x] Obtain the newest Vercel deployment/build/runtime evidence for the latest GitHub commit; the live alias still returned `FUNCTION_INVOCATION_FAILED`, requiring the latest repair to be redeployed.
+- [x] Resolve the remaining local live Vercel runtime issue by removing Vite-only imports from the serverless bundle and verify the API plus Run KGR flow locally.
 - [ ] Save the final deployment checkpoint and record the confirmed live status.
